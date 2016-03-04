@@ -1,0 +1,18 @@
+development:
+  nodes:
+    <% ENV.keys.select{|k| k =~ /REDIS_URL_CLICKSTORE/}.each do |key| %>
+    - url: <%= ENV[key] %>
+      driver: hiredis
+    <% end %>
+
+test:
+  nodes:
+    - url: redis://localhost:6379/15
+      driver: hiredis
+
+production:
+  nodes:
+    <% ENV.keys.select{|k| k =~ /REDIS_URL_CLICKSTORE/}.each do |key| %>
+    - url: <%= ENV[key] %>
+      driver: hiredis
+    <% end %>

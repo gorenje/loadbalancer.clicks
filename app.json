@@ -1,0 +1,53 @@
+{
+  "name" : "Eccrine tracking server",
+  "description": "Store clicks and handle redirects",
+  "keywords": [
+    "clicktracking"
+  ],
+  "website": "https://github.com/eccrine/tracking/blob/master/README.md",
+  "repository": "https://github.com/eccrine/tracking.rb",
+  "logo": "https://gravatar.com/avatar/62555cab6b84910405b3ea440ad3edf0",
+  "env": {
+    "RACK_ENV": {
+      "description": "Rack environment",
+      "value": "production"
+    },
+    "REDIS_URL_CLICKSTORE_1": {
+      "description": "URL to a clickstore redis instance"
+    },
+    "REDIS_URL_CLICKSTORE_2": {
+      "description": "Second URL to a clickstore redis instance"
+    },
+    "LIBRATO_PREFIX": {
+      "description": "Prefix for the librato metric names"
+    },
+    "LIBRATO_SOURCE": {
+      "description": "Source name for metrics posted to librato"
+    },
+    "LIBRATO_TOKEN": {
+      "description": "Librato API token"
+    },
+    "LIBRATO_USER": {
+      "description": "Name of the librato user, i.e. email"
+    },
+    "ERROR_PAGE_URL": {
+      "description": "The url heroku uses if the application is in error",
+      "value":"http://cdn-mkt.wooga.com/mops.assets/eccrine/index.html"
+    },
+    "MAINTENANCE_PAGE_URL": {
+      "description": "The url heroku uses if the application is in maintance",
+      "value": "http://cdn-mkt.wooga.com/mops.assets/eccrine/index.html"
+    },
+    "WEB_CONCURRENCY": {
+      "description": "unicorn worker count",
+      "value": "5" 
+    }
+  },
+  "addons": [
+    "papertrail:fredrik",
+    "librato:development",
+    "ssl:endpoint",
+    "newrelic:murdock",
+    "heroku-postgresql"
+  ]
+}

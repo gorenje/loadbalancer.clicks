@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang=en>
+
+<head>
+  <meta charset=utf-8>
+  <title>Please wait...</title>
+  <meta name="viewport" content="width=device-width">
+</head>
+
+<body style="display:none">
+  <script type="text/javascript" charset="utf-8">
+
+    String.prototype.parseQuery = function() {
+      var match, pl = /\+/g, search = /([^&=]+)=?([^&]*)/g;
+      var query  = this.substring(1);
+      var decode = function (s) {
+        return decodeURIComponent(s.replace(pl, " "));
+      };
+
+       urlParams = {};
+       while (match = search.exec(query))
+          urlParams[decode(match[1])] = decode(match[2]);
+
+      return urlParams;
+    };
+
+    Object.prototype.toQuery = function(encoded) {
+      if (encoded === null) {encoded = true;}
+      var str = [];
+      for(var attr in this) {
+        if (this.hasOwnProperty(attr)) {
+          value = this[attr];
+          if (value != null && typeof value === "object") {
+            value = encodeURIComponent(value.toQuery(false))
+          } else if (encoded) {
+            value = encodeURIComponent(value)
+          }
+          str.push(attr + "=" + value);
+        }
+      }
+      return str.join("&");
+    };
+
+    Object.prototype.merge = function(obj) {
+      result = this.clone()
+      for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) {
+          result[attr] = obj[attr];
+        }
+      }
+      return result;
+    };
+
+    Object.prototype.clone = function() {
+      if (null == this || "object" != typeof this) return this;
+      var copy = this.constructor();
+      for (var attr in this) {
+          if (this.hasOwnProperty(attr)) copy[attr] = this[attr];
+      }
+      return copy;
+    };
+
+    Array.prototype.include = function(obj) {
+      return this.indexOf(obj) != -1;
+    }
+
+    var UrlHelper = {
+
+      marketUrl: function(bundleid, params) {
+        params = {id: bundleid, referrer: params};
+        return "market://details?" + params.toQuery();
+      },
+
+      playStoreUrl: function(bundleid, params) {
+        params = {id: bundleid, referrer: params};
+        return "https://play.google.com/store/apps/details?" + params.toQuery();
+      },
+
+      itunesStoreUrl: function(appId, country) {
+        var query = {mt: 8, at: '10l4YY'}
+        return "itms://itunes.apple.com/" + (country || "") +
+          "/app/apple-store/" + appId + "?"+ query.toQuery();
+      },
+    }
+
+    var EccrineTrack = {
+
+      AndroidGames: [],
+
+      AppleIdLookup: {
+      },
+
+      GoogleBundleLookup: {
+      },
+
+      loggingHost: function() {
+        return EccrineTrack.params()["loggingHost"] || "//t.eccrine.io/"
+      },
+
+      trackingHost: function() {
+        return EccrineTrack.params()["trackingHost"] || "//tracking.eccrine.io/"
+      },
+
+      bundleid: function(name) {
+        return EccrineTrack.GoogleBundleLookup[name] || "com.google.unknown"
+      },
+
+      appid: function(name) {
+        return EccrineTrack.AppleIdLookup[name] || "id1"
+      },
+
+      isAndroidGame: function(app_id) {
+        return EccrineTrack.AndroidGames.include((app_id || "").toLowerCase())
+      },
+
+      params: function() {
+        this.cachedParams = this.cachedParams || location.search.parseQuery();
+        return this.cachedParams.clone();
+      },
+
+      loggingParams: function(params) {
+        return params.merge({
+          platform: navigator.platform,
+          locale: (navigator.language || "undef").substring(0,5)
+        });
+      },
+
+      redirect: function(url) {
+        document.location = url;
+      },
+
+      appleDevice: function(string) {
+        if (/iPhone/i.test(string)) {
+          return "iPhone";
+        } else if (/iPad/i.test(string)) {
+          return "iPad";
+        } else if (/iPod/i.test(string)) {
+          return "iPod";
+        } else {
+          return "unknown";
+        }
+      },
+
+      platform: function(string) {
+        if (/(Android|Linux)/i.test(string)) {
+          return "android";
+        } else if (/(iPhone|iPod|iPad)/i.test(string)) {
+          return "apple";
+        } else {
+          return "unknown";
+        }
+      },
+
+      ping: function(url, params, success, error, timeout, waittime) {
+        params["cb"] = Date.now()
+
+        var img = new Image();
+        img.src = url + "?" + params.toQuery()
+        img.onload = success;
+        img.onerror = error;
+        img.onabort = error;
+
+        setTimeout(function() {
+          if (!img.complete) {
+            timeout();
+          }
+        }, waittime);
+
+        document.body.appendChild(img);
+      },
+    }
+
+    try {
+      var params = EccrineTrack.params();
+      params['app_id'] = params['app_id'] || 'aai'
+      params = EccrineTrack.loggingParams(params);
+
+      var redirectUrl;
+      var app_id = params["app_id"];
+      var language = (navigator.language || navigator.browserLanguage ||
+        "en-us").substring(3, 5).toUpperCase();
+
+      switch (EccrineTrack.platform(navigator.userAgent)) {
+        case "android":
+          appId = EccrineTrack.bundleid(app_id);
+          redirectUrl = UrlHelper.marketUrl(appId, EccrineTrack.params());
+          break;
+        case "apple":
+          appId = EccrineTrack.appid(app_id);
+          platform = EccrineTrack.appleDevice(navigator.userAgent);
+          if (appId == 'id594802437' && ['iPod', 'iPhone'].include(platform)) {
+            appId = 'id969456511'
+          }
+          redirectUrl = UrlHelper.itunesStoreUrl(appId, language);
+          break;
+        case "unknown":
+          if (!app_id || EccrineTrack.isAndroidGame(app_id)) {
+            appId = EccrineTrack.bundleid(app_id);
+            redirectUrl = UrlHelper.playStoreUrl(appId, EccrineTrack.params());
+          } else {
+            appId = EccrineTrack.appid(app_id);
+            redirectUrl = UrlHelper.itunesStoreUrl(appId, language);
+          }
+          break;
+      }
+
+      var redirect = function() {
+        EccrineTrack.redirect(redirectUrl);
+      };
+
+      var errorParams = {
+        img: params,
+        redirectUrl: redirectUrl,
+        app_id: appId
+      }
+
+      EccrineTrack.ping(EccrineTrack.trackingHost(), params, redirect, function() {
+        EccrineTrack.ping(EccrineTrack.loggingHost() + "/w/eilerr" + appId.replace(/\./g ,'') + "/", errorParams, redirect, redirect, redirect, 1000);
+      }, function() {
+        EccrineTrack.ping(EccrineTrack.loggingHost() + "/w/eiltout" + appId.replace(/\./g, '') + "/", errorParams, redirect, redirect, redirect, 1000);
+      }, 6000);
+
+    } catch (e) {
+      var params = {
+        descr: e.message,
+        useragent: navigator.userAgent,
+        language: navigator.language,
+        search: location.search,
+        platform: navigator.platform
+      }
+      var redirect = function() {
+        document.location = "itms://itunes.apple.com/app/apple-store/id1?mt=8";
+      };
+      EccrineTrack.ping(EccrineTrack.loggingHost + "/w/ejserr/", params, redirect, redirect, redirect, 4000);
+    }
+  </script>
+</body>
+</html>
