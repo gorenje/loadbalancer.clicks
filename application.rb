@@ -45,6 +45,7 @@ Dir[File.join(File.dirname(__FILE__),'config', 'initializers','*.rb')].
 
 use Librato::Rack
 
+require_relative 'lib/click_handler.rb'
 require_relative 'lib/ruby_extensions.rb'
 require_relative 'lib/exception_handling.rb'
 use ExceptionHandling
@@ -58,5 +59,12 @@ end
 require_relative 'lib/redis_pool.rb'
 require_relative 'lib/redis_queue.rb'
 
-# initial the controllers
-Dir[File.join(File.dirname(__FILE__),'routes','*.rb')].each { |a| require a }
+[
+ ['routes'],
+ ['models'],
+].each do |path|
+  Dir[File.join(File.dirname(__FILE__), path, '*.rb')].each { |f| require f }
+end
+
+# setup the campaign link cache
+$refresh_cam_lnk_cache.call

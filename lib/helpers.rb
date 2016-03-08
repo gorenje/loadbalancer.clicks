@@ -6,7 +6,7 @@ module EccrineTracking
 
     def obtain_adid
       adid = params[:adid] || params[:idfa] || params[:gadid]
-      ClickParser.valid_adid?(adid) ? adid : nil
+      ClickHandler.valid_adid?(adid) ? adid : nil
     end
 
     def appstore_from_params
@@ -21,20 +21,13 @@ module EccrineTracking
       geoip_country(ip) || DefaultCountry
     end
 
-    def obtain_apple_id(app_name)
-      app_name = ClickParser.get_apple_app_name(app_name) unless ClickParser.apple_app?(app_name)
-      AppleIdLookup[app_name.to_s.downcase] || 'id1009200976'
-    end
-
-    def obtain_google_id(app_id, app_name)
-      app_name = ClickParser.get_android_app_name(app_name) unless ClickParser.android_app?(app_name)
-      GoogleBundleLookup[app_id.to_s.downcase] || GoogleBundleLookup[app_name.to_s.downcase] || 'com.wooga.futurama'
-    end
-
     def handle_tracking_call(redirect = true)
       click_handler = ClickHandler.new(params, request)
       url, code = click_handler.handle_call
-      if !redirect
+
+      if url.blank?
+        halt(404)
+      elsif !redirect
         [200, ['']]
       elsif code
         redirect url, code
