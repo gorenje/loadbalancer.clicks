@@ -8,9 +8,10 @@ class RedisQueue
   end
 
   def push(click)
-    $librato_aggregator.add(
-      "#{ENV['LIBRATO_PREFIX']}.click.#{(click[:app_id]||"").gsub(/[^[:alnum:]]/, '')}" => 1
-    )
+    unless ENV['LIBRATO_USER'].blank?
+      $librato_aggregator.
+        add("#{ENV['LIBRATO_PREFIX']}.click.#{(click[:app_id]||"").gsub(/[^[:alnum:]]/, '')}" => 1)
+    end
 
     pool.execute do |redis|
       redis.rpush(key, encode(click))
