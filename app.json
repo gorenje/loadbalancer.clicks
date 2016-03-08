@@ -5,7 +5,7 @@
     "clicktracking"
   ],
   "website": "https://github.com/eccrine/tracking/blob/master/README.md",
-  "repository": "https://github.com/eccrine/tracking.rb",
+  "repository": "https://github.com/eccrine/tracking",
   "logo": "https://gravatar.com/avatar/62555cab6b84910405b3ea440ad3edf0",
   "env": {
     "RACK_ENV": {
