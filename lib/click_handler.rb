@@ -155,6 +155,7 @@ class ClickHandler
       :country            => country_for_ip(ip).iso_code,
       :platform           => platform,
       :device_name        => device_detector.device_name,
+      :device_type        => device_detector.device_type,
     }.merge(extras).reject { |_,v| v.blank? }
   end
 
