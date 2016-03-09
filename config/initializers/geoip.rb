@@ -1,3 +1,4 @@
-require 'geoip'
+require 'maxminddb'
 
-$geoip ||= GeoIP.new(File.join(File.dirname(__FILE__),"..","..","geoip.dat"))
+$geoip ||=
+  MaxMindDB.new(File.join(File.dirname(__FILE__),"..","..","geoip.dat"))

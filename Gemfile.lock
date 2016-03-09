@@ -43,6 +43,7 @@ GEM
     chronic (0.10.2)
     coderay (1.1.1)
     daemons (1.2.3)
+    device_detector (0.8.2)
     dotenv (2.1.0)
     edgecast_api (0.0.1)
       httparty
@@ -54,7 +55,6 @@ GEM
     fast_blank (1.0.0)
     foreman (0.78.0)
       thor (~> 0.19.1)
-    geoip (1.6.1)
     hetchy (1.0.0)
     highline (1.7.8)
     hiredis (0.6.1)
@@ -82,6 +82,7 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
+    maxminddb (0.1.11)
     method_source (0.8.2)
     mime-types (1.25.1)
     mini_portile2 (2.0.0)
@@ -176,13 +177,13 @@ DEPENDENCIES
   activerecord
   activerecord-import
   cheat
+  device_detector
   dotenv
   edgecast_api
   erubis
   fakeweb
   fast_blank
   foreman
-  geoip
   highline
   hiredis
   hpricot
@@ -190,6 +191,7 @@ DEPENDENCIES
   librato-metrics
   librato-rack
   mail
+  maxminddb
   net-sftp
   newrelic-redis
   newrelic_rpm (~> 3.7.3)

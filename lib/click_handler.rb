@@ -2,7 +2,7 @@ require_relative '../lib/helpers.rb'
 
 class ClickHandler
 
-  DefaultCountry = OpenStruct.new(:city_name => nil, :country_code2 => nil)
+  DefaultCountry = OpenStruct.new(:iso_code => nil)
 
   attr_reader :adid, :adgroup, :ad, :app_id, :campaign, :click, :ip, :network,
               :partner_data, :platform, :idfa_md5, :idfa_sha1,
@@ -134,7 +134,7 @@ class ClickHandler
   end
 
   def geoip_country(ip)
-    ($geoip && ip && $geoip.country(ip)) rescue DefaultCountry
+    ($geoip && ip && $geoip.lookup(ip).country) rescue DefaultCountry
   end
 
   def country_for_ip(ip)
@@ -156,7 +156,7 @@ class ClickHandler
       :lookup_key         => lookup_key,
       :campaign_link_id   => @camlink.id,
       :attribution_window => created_at..valid_till,
-      :country            => country_for_ip(ip).country_code2
+      :country            => country_for_ip(ip).iso_code
     }.reject { |_,v| v.blank? }
   end
 
