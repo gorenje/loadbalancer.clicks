@@ -39,7 +39,6 @@ if settings.environment == :development
   require 'pry'
 end
 
-#get initializers
 Dir[File.join(File.dirname(__FILE__),'config', 'initializers','*.rb')].
   each { |a| require_relative a }
 
