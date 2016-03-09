@@ -1,4 +1,4 @@
-get '/track/:id/go' do
+get '/click/:id/go' do
   # hack to refresh the campaign cache, expensive to do this on every
   # request but updating global variables is stupid.
   $refresh_cam_lnk_cache.call

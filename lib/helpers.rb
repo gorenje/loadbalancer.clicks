@@ -2,8 +2,6 @@
 module EccrineTracking
   module Helpers
 
-    DefaultCountry = OpenStruct.new(:city_name => nil, :country_code2 => nil)
-
     def obtain_adid
       adid = params[:adid] || params[:idfa] || params[:gadid]
       ClickHandler.valid_adid?(adid) ? adid : nil
@@ -11,14 +9,6 @@ module EccrineTracking
 
     def appstore_from_params
       (!params[:ascc].blank? && params[:ascc]) || nil
-    end
-
-    def geoip_country(ip)
-      ($geoip && ip && $geoip.country(ip)) rescue DefaultCountry
-    end
-
-    def country_for_ip(ip)
-      geoip_country(ip) || DefaultCountry
     end
 
     def handle_tracking_call(redirect = true)

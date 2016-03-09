@@ -2,6 +2,8 @@ require_relative '../lib/helpers.rb'
 
 class ClickHandler
 
+  DefaultCountry = OpenStruct.new(:city_name => nil, :country_code2 => nil)
+
   attr_reader :adid, :adgroup, :ad, :app_id, :campaign, :click, :ip, :network,
               :partner_data, :platform, :idfa_md5, :idfa_sha1,
               :idfa_comb, :created_at, :device, :app_name
@@ -131,13 +133,19 @@ class ClickHandler
     end
   end
 
+  def geoip_country(ip)
+    ($geoip && ip && $geoip.country(ip)) rescue DefaultCountry
+  end
+
+  def country_for_ip(ip)
+    geoip_country(ip) || DefaultCountry
+  end
+
   def to_click_hash
     {
-      :ip                 => ip,
       :adid               => adid,
       :adgroup            => adgroup,
       :ad                 => ad,
-      :app_id             => app_id,
       :campaign           => campaign,
       :network            => network,
       :click              => click,
@@ -148,6 +156,7 @@ class ClickHandler
       :lookup_key         => lookup_key,
       :campaign_link_id   => @camlink.id,
       :attribution_window => created_at..valid_till,
+      :country            => country_for_ip(ip).country_code2
     }.reject { |_,v| v.blank? }
   end
 
