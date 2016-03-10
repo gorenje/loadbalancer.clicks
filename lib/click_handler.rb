@@ -156,6 +156,7 @@ class ClickHandler
       :platform           => platform,
       :device_name        => device_detector.device_name,
       :device_type        => device_detector.device_type,
+      :bot_name           => device_detector.bot_name,
     }.merge(extras).reject { |_,v| v.blank? }
   end
 
