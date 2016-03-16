@@ -32,25 +32,6 @@ class ClickHandler
     @referrer   = request.referrer
   end
 
-  def self.platform_from_useragent(request)
-    case request.user_agent
-      when /iPod;/i, /iPod touch;/i then :iPod
-      when /iPad;/i                 then :iPad
-      when /iPhone;/i               then :iPhone
-      else
-        :unknown
-    end
-  end
-
-  def self.device_from_useragent(request)
-    case request.user_agent
-      when /(Android|Linux)/i    then :android
-      when /(iPhone|iPod|iPad)/i then :apple
-      else
-        :unknown
-    end
-  end
-
   def self.pimp_adid_if_broken(adid)
     if adid =~ /^([a-f0-9]{8})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{12})$/i
       "#{$1}-#{$2}-#{$3}-#{$4}-#{$5}"
