@@ -10,14 +10,15 @@ class ClickHandler
 
   def initialize(params, request)
     @device_detector = DeviceDetector.new(request.user_agent)
+    @camlink         = $cam_lnk_cache[params[:id].to_i]
 
     @ip           = request.ip || '0.0.0.0'
     @device       = @device_detector.device_type.to_s.downcase
     @adid         = params[:adid] ? ClickHandler.pimp_adid_if_broken(params[:adid]) : nil
-    @adgroup      = params[:adgroup]
-    @ad           = params[:ad]
-    @campaign     = params[:campaign]
-    @network      = params[:network]
+    @adgroup      = @camlink.adgroup
+    @ad           = @camlink.ad
+    @campaign     = @camlink.campaign
+    @network      = @camlink.network
     @click        = ClickHandler.get_click_param(network, params[:click]||"")
     @partner_data = params[:partner_data] || params[:cb]
     @platform     = @device_detector.os_name.to_s.downcase
@@ -25,7 +26,6 @@ class ClickHandler
     @idfa_sha1    = params[:idfa_sha1]
     @created_at   = DateTime.now
     @idfa_comb    = compose_idfa_comb(@adid, @idfa_md5, @idfa_sha1, params)
-    @camlink      = $cam_lnk_cache[params[:id].to_i]
 
     # private, not for normal consumption.
     @user_agent = request.user_agent
