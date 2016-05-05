@@ -4,6 +4,8 @@ class ClickHandler
 
   DefaultCountry = OpenStruct.new(:iso_code => nil)
 
+  FractionOfDay = 1/3600.to_f
+
   attr_reader :adid, :adgroup, :ad, :campaign, :click, :ip, :network,
               :partner_data, :platform, :idfa_md5, :idfa_sha1,
               :idfa_comb, :created_at, :device, :app_name, :device_detector
@@ -101,11 +103,11 @@ class ClickHandler
   end
 
   def valid_till
-    if has_idfa_comb?
-      @created_at + (@camlink.attribution_window_idfa * (1/3600.to_f))
-    else
-      @created_at + (@camlink.attribution_window_fingerprint * (1/3600.to_f))
-    end
+    @created_at + (if has_idfa_comb?
+                     @camlink.attribution_window_idfa
+                   else
+                     @camlink.attribution_window_fingerprint
+                   end * FractionOfDay)
   end
 
   def geoip_country(ip)
