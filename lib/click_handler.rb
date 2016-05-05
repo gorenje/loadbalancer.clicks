@@ -148,7 +148,8 @@ class ClickHandler
   end
 
   def url_for(plform)
-    @camlink.target_url[plform] || @camlink.target_url["default"]
+    @camlink.target_url[plform] || @camlink.target_url["default"] ||
+      @camlink.target_url["fallback"]
   end
 
   def handle_call
