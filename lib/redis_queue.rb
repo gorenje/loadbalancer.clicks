@@ -14,7 +14,7 @@ class RedisQueue
     end
 
     pool.execute do |redis|
-      redis.rpush(key, encode(click))
+      redis.rpush(key, click)
     end
   rescue EncodingError => e
     $stderr.puts "Encoding issue: #{click.inspect}"
@@ -46,19 +46,6 @@ class RedisQueue
     NewRelic::Agent.notice_error(e)
   end
 
-
-  def pop(number_of_elements = 1)
-    elements = pool.execute do |redis|
-      redis.pipelined do |pipe|
-        number_of_elements.times { pipe.lpop(key) }
-      end
-    end
-
-    elements.compact.map do |element|
-      decode(element)
-    end
-  end
-
   def size
     pool.execute {|redis| redis.llen(key)}
   end
@@ -73,15 +60,5 @@ class RedisQueue
         decode(clk)
       end
     end
-  end
-
-private
-
-  def encode(click)
-    JSON.dump(click)
-  end
-
-  def decode(click)
-    JSON.parse(click)
   end
 end

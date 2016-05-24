@@ -1,9 +1,3 @@
-GIT
-  remote: git://github.com/wlf/device_detector.git
-  revision: 9b0700ccaca250b7b3efcc9d24b78612c837485b
-  specs:
-    device_detector (0.8.2)
-
 GEM
   remote: http://rubygems.org/
   specs:
@@ -39,6 +33,7 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
+    addressable (2.4.0)
     aggregate (0.2.2)
     ansi (1.5.0)
     arel (6.0.3)
@@ -87,7 +82,6 @@ GEM
       nokogiri (>= 1.5.9)
     mail (2.6.3)
       mime-types (>= 1.16, < 3)
-    maxminddb (0.1.11)
     method_source (0.8.2)
     mime-types (1.25.1)
     mini_portile2 (2.0.0)
@@ -181,8 +175,8 @@ DEPENDENCIES
   active_record_migrations
   activerecord
   activerecord-import
+  addressable
   cheat
-  device_detector!
   dotenv
   edgecast_api
   erubis
@@ -196,7 +190,6 @@ DEPENDENCIES
   librato-metrics
   librato-rack
   mail
-  maxminddb
   net-sftp
   newrelic-redis
   newrelic_rpm (~> 3.7.3)

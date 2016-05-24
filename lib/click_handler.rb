@@ -2,20 +2,16 @@ require_relative '../lib/helpers.rb'
 
 class ClickHandler
 
-  DefaultCountry = OpenStruct.new(:iso_code => nil)
-
   FractionOfDay = 1/3600.to_f
 
   attr_reader :adid, :adgroup, :ad, :campaign, :click, :ip, :network,
               :partner_data, :platform, :idfa_md5, :idfa_sha1,
-              :idfa_comb, :created_at, :device, :app_name, :device_detector
+              :idfa_comb, :created_at, :app_name
 
   def initialize(params, request)
-    @device_detector = DeviceDetector.new(request.user_agent)
     @camlink         = $cam_lnk_cache[params[:id].to_i]
 
     @ip           = request.ip || '0.0.0.0'
-    @device       = @device_detector.device_type.to_s.downcase
     @adid         = params[:adid] ? ClickHandler.pimp_adid_if_broken(params[:adid]) : nil
     @adgroup      = @camlink.adgroup
     @ad           = @camlink.ad
@@ -23,7 +19,6 @@ class ClickHandler
     @network      = @camlink.network
     @click        = ClickHandler.get_click_param(network, params[:click]||"")
     @partner_data = params[:partner_data] || params[:cb]
-    @platform     = @device_detector.os_name.to_s.downcase
     @idfa_md5     = params[:idfa_md5]
     @idfa_sha1    = params[:idfa_sha1]
     @created_at   = DateTime.now
@@ -110,37 +105,30 @@ class ClickHandler
                    end * FractionOfDay)
   end
 
-  def geoip_country(ip)
-    ($geoip && ip && $geoip.lookup(ip).country) rescue DefaultCountry
-  end
-
-  def country_for_ip(ip)
-    geoip_country(ip) || DefaultCountry
-  end
-
-  def to_click_hash(extras = {})
-    {
-      ## General information about the click parameters:
-      :network            => network,
-      :adid               => adid,
-      :adgroup            => adgroup,
-      :ad                 => ad,
-      :campaign           => campaign,
-      :created_at         => created_at,
+  def click_to_kafka_string(extras = {})
+    uri = Addressable::URI.new
+    uri.query_values = {
+      :network    => network,
+      :adid       => adid,
+      :adgroup    => adgroup,
+      :ad         => ad,
+      :campaign   => campaign,
+      :created_at => created_at.to_s,
       ## for attribution of clicks to installs, the following:
-      :click              => click,
-      :partner_data       => partner_data,
-      :idfa_comb          => idfa_comb,
-      :lookup_key         => lookup_key,
-      :attribution_window => created_at..valid_till,
+      :click            => click,
+      :partner_data     => partner_data,
+      :idfa_comb        => idfa_comb,
+      :lookup_key       => lookup_key,
+      :attr_window_from => created_at.to_s,
+      :attr_window_till => valid_till.to_s,
       ## For fraud detection, include the following:
-      :campaign_link_id   => @camlink.id,
-      :country            => country_for_ip(ip).iso_code,
-      :platform           => platform,
-      :device_name        => device_detector.device_name,
-      :device_type        => device_detector.device_type,
-      :bot_name           => device_detector.bot_name,
-    }.merge(extras).reject { |_,v| v.blank? }
+      :campaign_link_id => @camlink.id,
+    }.merge(extras)
+
+    "%s %i %s %s %s %s" % [@ip, Time.now.to_i,
+                           "clicks", # kafka topic
+                           "/t/click", # event type
+                           uri.query, @user_agent]
   end
 
   def click_queue
@@ -155,7 +143,7 @@ class ClickHandler
   def handle_call
     url = url_for(platform)
 
-    click_queue.push(to_click_hash(:redirect_url => url))
+    click_queue.push(click_to_kafka_string(:redirect_url => url))
 
     url.blank? ? ["",404] : [url, 307]
   end

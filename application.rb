@@ -11,6 +11,7 @@ require 'json'
 require 'oj_mimic_json'
 require 'fast_blank'
 require 'digest/md5'
+require 'addressable/uri'
 
 if File.exists?(".env")
   require 'dotenv'

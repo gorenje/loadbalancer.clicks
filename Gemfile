@@ -16,7 +16,6 @@ gem 'hiredis'
 gem 'redis', :require => ["redis", "redis/connection/hiredis"]
 gem 'ya_circuit_breaker', "0.0.3"
 
-gem 'maxminddb'
 gem 'pry'
 gem 'term-ansicolor'
 gem 'highline'
@@ -32,7 +31,7 @@ gem 'pg'
 gem 'active_record_migrations'
 gem 'activerecord-import'
 
-gem 'device_detector', :github => 'wlf/device_detector'
+gem 'addressable'
 
 group :test do
   gem 'hpricot'
