@@ -31,6 +31,7 @@ gem 'pg'
 gem 'active_record_migrations'
 gem 'activerecord-import'
 
+gem 'device_detector', :github => 'wlf/device_detector'
 gem 'addressable'
 
 group :test do

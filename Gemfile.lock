@@ -1,3 +1,9 @@
+GIT
+  remote: git://github.com/wlf/device_detector.git
+  revision: 9b0700ccaca250b7b3efcc9d24b78612c837485b
+  specs:
+    device_detector (0.8.2)
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -177,6 +183,7 @@ DEPENDENCIES
   activerecord-import
   addressable
   cheat
+  device_detector!
   dotenv
   edgecast_api
   erubis

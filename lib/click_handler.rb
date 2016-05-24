@@ -6,7 +6,7 @@ class ClickHandler
 
   attr_reader :adid, :adgroup, :ad, :campaign, :click, :ip, :network,
               :partner_data, :platform, :idfa_md5, :idfa_sha1,
-              :idfa_comb, :created_at, :app_name
+              :idfa_comb, :created_at, :app_name, :user_agent
 
   def initialize(params, request)
     @camlink         = $cam_lnk_cache[params[:id].to_i]
@@ -23,10 +23,7 @@ class ClickHandler
     @idfa_sha1    = params[:idfa_sha1]
     @created_at   = DateTime.now
     @idfa_comb    = compose_idfa_comb(@adid, @idfa_md5, @idfa_sha1, params)
-
-    # private, not for normal consumption.
-    @user_agent = request.user_agent
-    @referrer   = request.referrer
+    @user_agent   = request.user_agent
   end
 
   def self.pimp_adid_if_broken(adid)
@@ -125,10 +122,7 @@ class ClickHandler
       :campaign_link_id => @camlink.id,
     }.merge(extras)
 
-    "%s %i %s %s %s %s" % [@ip, Time.now.to_i,
-                           "clicks", # kafka topic
-                           "/t/click", # event type
-                           uri.query, @user_agent]
+    "%s %i clicks /t/click %s %s" % [ip, Time.now.to_i, uri.query, user_agent]
   end
 
   def click_queue
@@ -138,6 +132,10 @@ class ClickHandler
   def url_for(plform)
     @camlink.target_url[plform] || @camlink.target_url["default"] ||
       @camlink.target_url["fallback"]
+  end
+
+  def platform
+    DeviceDetector.new(@user_agent).os_name.to_s.downcase
   end
 
   def handle_call
