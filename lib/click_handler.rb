@@ -118,8 +118,9 @@ class ClickHandler
       :lookup_key       => lookup_key,
       :attr_window_from => created_at.to_s,
       :attr_window_till => valid_till.to_s,
-      ## For fraud detection, include the following:
+      ## For statistics and consumer sanity
       :campaign_link_id => @camlink.id,
+      :user_id          => @camlink.user_id,
     }.merge(extras)
 
     "%s %i clicks /t/click %s %s" % [ip, Time.now.to_i, uri.query, user_agent]
