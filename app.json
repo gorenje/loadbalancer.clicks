@@ -46,7 +46,6 @@
   },
   "addons": [
     "papertrail",
-    "librato:development",
     "ssl:endpoint",
     "heroku-postgresql"
   ]
