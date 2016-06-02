@@ -1,12 +1,13 @@
 {
-  "name" : "Eccrine tracking server",
-  "description": "Store clicks and handle redirects",
+  "name" : "Adtekio Click Load Balancer",
+  "description": "Campaign click handler and load balancer",
   "keywords": [
-    "clicktracking"
+    "productivity",
+    "mobile advertising"
   ],
-  "website": "https://github.com/eccrine/tracking/blob/master/README.md",
-  "repository": "https://github.com/eccrine/tracking",
-  "logo": "https://gravatar.com/avatar/62555cab6b84910405b3ea440ad3edf0",
+  "website": "https://github.com/adtekio/tracking.clicks/blob/master/README.md",
+  "repository": "https://github.com/adtekio/tracking.clicks",
+  "logo": "https://avatars2.githubusercontent.com/u/17549165",
   "env": {
     "RACK_ENV": {
       "description": "Rack environment",
