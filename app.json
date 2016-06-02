@@ -45,10 +45,9 @@
     }
   },
   "addons": [
-    "papertrail:fredrik",
+    "papertrail",
     "librato:development",
     "ssl:endpoint",
-    "newrelic:murdock",
     "heroku-postgresql"
   ]
 }
