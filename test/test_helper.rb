@@ -1,8 +1,9 @@
-ENV['RAILS_ENV'] = 'test' # ensures that settings.environment == 'test'
-ENV['RACK_ENV']  = 'test'
-ENV['IP']        = 'www.example.com'
-ENV['PORT']      = '9999'
-ENV['TZ']        = 'UTC'
+ENV['RAILS_ENV']    = 'test' # ensures that settings.environment == 'test'
+ENV['RACK_ENV']     = 'test'
+ENV['IP']           = 'www.example.com'
+ENV['PORT']         = '9999'
+ENV['TZ']           = 'UTC'
+ENV['DATABASE_URL'] = ENV['DATABASE_URL'] + "_test"
 
 require "bundler/setup"
 require 'rack/test'
@@ -28,7 +29,7 @@ class Minitest::Test
 
   def silence_is_golden
     old_stderr,old_stdout,stdout,stderr = $stderr,$stdout,StringIO.new,
-                                          StringIO.new
+    StringIO.new
     $stdout = stdout
     $stderr = stderr
     result = yield
@@ -41,6 +42,34 @@ class Minitest::Test
     assert last_response.redirect?, "Request was not redirect (#{msg})"
     assert_equal('http://example.org/%s' % [path],
                  last_response.headers["Location"], "Redirect location didn't match (#{msg}")
+  end
+
+  def assert_click_params(params, unchanged_cl_data, msg = nil)
+    unchanged_cl_data.each do |key, value|
+      assert_equal(value, params[key.to_s].first, "Mismatch: #{key}")
+    end
+  end
+
+  def pop_click
+    assert_equal 1, @queue.size, "Pop click didn't except this"
+    click_details = @queue.pop.first.split
+    [click_details, CGI.parse(click_details[-2])]
+  end
+
+  def generate_campaign_link(merge_data = {})
+    CampaignLink.
+      create({ :device       => "ios",
+               :campaign_url => "http://www.example.org/",
+               :target_url   => {
+                 "ios"      => "http://example.org/ios",
+                 "android"  => "http://example.org/android",
+                 "fallback" => "http://example.org/fallback",
+                 "default"  => "http://example.org/default",
+               },
+               :country      => "DE",
+               :attribution_window_fingerprint => 10,
+               :attribution_window_idfa        => 100,
+             }.merge(merge_data))
   end
 end
 

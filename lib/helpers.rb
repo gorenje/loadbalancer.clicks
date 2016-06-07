@@ -1,7 +1,6 @@
 # encoding: UTF-8
 module EccrineTracking
   module Helpers
-
     def obtain_adid
       adid = params[:adid] || params[:idfa] || params[:gadid]
       ClickHandler.valid_adid?(adid) ? adid : nil
