@@ -28,8 +28,9 @@ class Minitest::Test
   include RR::Adapters::TestUnit
 
   def silence_is_golden
-    old_stderr,old_stdout,stdout,stderr = $stderr,$stdout,StringIO.new,
-    StringIO.new
+    old_stderr,old_stdout,stdout,stderr =
+      $stderr, $stdout, StringIO.new, StringIO.new
+
     $stdout = stdout
     $stderr = stderr
     result = yield
