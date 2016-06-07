@@ -51,6 +51,11 @@ are separeted by a single space):
 If this format should change, then the [kafkastore](https://github.com/adtekio/kafkastore/blob/a9e3670011c71fcc669a46e62df95d06683cae79/lib/batch_worker.rb#L26-L42)
 needs updating, along with the [in-app tracker](https://github.com/adtekio/tracking.inapp/blob/448d1b81b921bf77896a467e15358bc6f022cc56/routes/tracking.rb#L11-L15).
 
+### Redirect Handling
+
+Redirection to the applicable application store is done based on the platform
+of the device making the request. This is of course, in certain senses, an
+approximation but can be [easily changed](https://github.com/adtekio/tracking.clicks/blob/985520904bf22b600edf45f21626430b1ae08d60/lib/click_handler.rb#L133-L140) if reality changes.
 
 ## Deployment
 
