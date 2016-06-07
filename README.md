@@ -65,6 +65,11 @@ Easiest way to deploy this, is to use heroku!
 
 ## Testing locally
 
+Generate a ```.env``` and then fill it with values:
+
+    prompt> rake appjson:to_dotenv
+    prompt> $EDITOR .env
+
 First setup a test database:
 
     prompt> RACK_ENV=test rake db:create
