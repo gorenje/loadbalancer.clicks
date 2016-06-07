@@ -63,7 +63,29 @@ Easiest way to deploy this, is to use heroku!
 
 [![Deploy To Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy?template=https://github.com/adtekio/tracking.clicks)
 
-## Setup & Testing locally
+## Testing locally
+
+Generate a ```.env``` and then fill it with values:
+
+    prompt> rake appjson:to_dotenv
+    prompt> $EDITOR .env
+
+First setup a test database:
+
+    prompt> RACK_ENV=test rake db:create
+    prompt> RACK_ENV=test rake db:migrate
+
+This will the database used in development but the database name will have
+a [postfix](https://github.com/adtekio/tracking.clicks/blob/master/Rakefile)
+of ```_test```.
+
+Then run the tests:
+
+    prompt> rake
+
+Should all pass!
+
+## Starting locally
 
 Generate a ```.env``` and then fill it with values:
 

@@ -12,6 +12,9 @@ if File.exists?(".env")
   Dotenv.load
 end
 
+# hack to differentiate databases when doing tests & running development
+ENV['DATABASE_URL'] = ENV['DATABASE_URL'] + "_test" if ENV['RACK_ENV'] == 'test'
+
 Dir[File.join(File.dirname(__FILE__), 'lib', 'task','*.rake')].
   each { |f| load f }
 
