@@ -197,6 +197,7 @@ DEPENDENCIES
   librato-metrics
   librato-rack
   mail
+  minitest
   net-sftp
   newrelic-redis
   newrelic_rpm (~> 3.7.3)

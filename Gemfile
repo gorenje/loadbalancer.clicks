@@ -41,6 +41,7 @@ group :test do
   gem 'shoulda'
   gem 'jasmine'
   gem 'fakeweb'
+  gem 'minitest'
 end
 
 group :development do

@@ -104,33 +104,4 @@ class String
   def to_date_string
     gsub(/(....)(..)(..)(..)(..)(..)/, '\3-\2-\1 \4:\5:\6')
   end
-
-  # Remove erronanous international prefix that is included in the scanned
-  # representation of a barcode. Because DHL has extended shipment codes for
-  # international shipments, these shipments, when scanned, seem to be prefixed
-  # with '+C1', this is then removed.
-  #
-  # No Argument.
-  #
-  # Example
-  #     "+C100".remove_intl_prefix
-  #     => "00"
-  #
-  # Check and remove the prefix.
-  def remove_intl_prefix
-    self.sub(/^[+]C1/,'')
-  end
-end
-
-class Range
-  def to_json(*a)
-    {
-      'json_class'   => self.class.name,
-      'data'         => [ first, last, exclude_end? ]
-    }.to_json(*a)
-  end
-
-  def self.json_create(o)
-    new(*o['data'])
-  end
 end
