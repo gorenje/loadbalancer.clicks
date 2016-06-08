@@ -18,5 +18,20 @@ class ClickHandlerTest < Minitest::Test
 
       assert_equal cl, $cam_lnk_cache[cl.id]
     end
+
+    should "compute correct attribution window - idfa" do
+      # attribution windows are minutes, so 1440 becomes one day.
+      cl = generate_campaign_link(:attribution_window_idfa => 1440)
+      clh = ClickHandler.new({:id => cl.id, :adid => SecureRandom.uuid},
+                             OpenStruct.new)
+      assert_equal 1, (clh.valid_till - clh.created_at).to_i
+    end
+
+    should "compute correct attribution window - fingerprint" do
+      # attribution windows are minutes, so 1440 becomes one day.
+      cl = generate_campaign_link(:attribution_window_fingerprint => 1440)
+      clh = ClickHandler.new({:id => cl.id}, OpenStruct.new)
+      assert_equal 1, (clh.valid_till - clh.created_at).to_i
+    end
   end
 end
