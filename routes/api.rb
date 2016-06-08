@@ -1,5 +1,5 @@
 post '/api/:version/create' do
-  if ENV['API_SECRET_KEY']
+  unless ENV['API_SECRET_KEY'].blank?
     pepper = Digest::SHA1.
       hexdigest(request.env["HTTP_X_API_SALT"] + params[:campaign_link] +
                 ENV['API_SECRET_KEY']) rescue ""

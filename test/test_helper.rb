@@ -74,6 +74,14 @@ class Minitest::Test
              }.merge(merge_data))
   end
 
+  def replace_in_env(changes)
+    original_values = Hash[changes.map { |k,_| [k,ENV[k] ]}]
+    changes.each { |k,v| ENV[k] = v }
+    yield
+  ensure
+    original_values.each { |key,value| ENV[key] = value }
+  end
+
   def add_to_env(changes)
     changes.each { |k,v| ENV[k] = v }
     yield
