@@ -17,27 +17,41 @@
       "description": "URL to a clickstore redis instance"
     },
     "REDIS_URL_CLICKSTORE_2": {
-      "description": "Second URL to a clickstore redis instance"
+      "description": "Second URL to a clickstore redis instance",
+      "required": false
+    },
+    "REDIS_URL_CLICKSTORE_3": {
+      "description": "Third URL to a clickstore redis instance",
+      "required": false
     },
     "LIBRATO_PREFIX": {
-      "description": "Prefix for the librato metric names"
+      "description": "Prefix for the librato metric names",
+      "required": false
     },
     "LIBRATO_SOURCE": {
-      "description": "Source name for metrics posted to librato"
+      "description": "Source name for metrics posted to librato",
+      "required": false
     },
     "LIBRATO_TOKEN": {
-      "description": "Librato API token"
+      "description": "Librato API token",
+      "required": false
     },
     "LIBRATO_USER": {
-      "description": "Name of the librato user, i.e. email"
+      "description": "Name of the librato user, i.e. email",
+      "required": false
     },
     "ERROR_PAGE_URL": {
       "description": "The url heroku uses if the application is in error",
-      "value":"http://cdn-mkt.wooga.com/mops.assets/eccrine/index.html"
+      "value": "http://your.home.page"
     },
     "MAINTENANCE_PAGE_URL": {
       "description": "The url heroku uses if the application is in maintance",
-      "value": "http://cdn-mkt.wooga.com/mops.assets/eccrine/index.html"
+      "value": "http://your.home.page"
+    },
+    "NOT_FOUND_URL": {
+      "description": "Campaign link does not define a URL (for some reason) then use this URL",
+      "value": "http://your.home.page",
+      "required": false
     },
     "WEB_CONCURRENCY": {
       "description": "unicorn worker count",

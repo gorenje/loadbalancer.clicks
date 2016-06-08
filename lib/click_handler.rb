@@ -9,7 +9,13 @@ class ClickHandler
               :idfa_comb, :created_at, :app_name, :user_agent
 
   def initialize(params, request)
-    @camlink         = $cam_lnk_cache[params[:id].to_i]
+    @camlink = $cam_lnk_cache[params[:id].to_i]
+
+    # refresh the cache if we didn't find a campaign link
+    @camlink = if @camlink.nil?
+      $refresh_cam_lnk_cache.call
+      $cam_lnk_cache[params[:id].to_i]
+    end
 
     @ip           = request.ip || '0.0.0.0'
     @adid         = params[:adid] ? ClickHandler.pimp_adid_if_broken(params[:adid]) : nil
@@ -24,6 +30,12 @@ class ClickHandler
     @created_at   = DateTime.now
     @idfa_comb    = compose_idfa_comb(@adid, @idfa_md5, @idfa_sha1, params)
     @user_agent   = request.user_agent
+
+    # original parameters but remove everything that we use or send already
+    @params = params.tap do |p|
+      ["id", "adid", :adid, "idfa", "gadid", "click", "captures", "idfa_md5",
+       "idfa_sha1", "partner_data"].each { |key| p.delete(key) }
+    end
   end
 
   def self.pimp_adid_if_broken(adid)
@@ -103,6 +115,9 @@ class ClickHandler
   end
 
   def click_to_kafka_string(extras = {})
+    paramsuri = Addressable::URI.new
+    paramsuri.query_values = @params
+
     uri = Addressable::URI.new
     uri.query_values = {
       :network    => network,
@@ -121,6 +136,7 @@ class ClickHandler
       ## For statistics and consumer sanity
       :campaign_link_id => @camlink.id,
       :user_id          => @camlink.user_id,
+      :reqparams        => paramsuri.query
     }.merge(extras)
 
     "%s %i clicks /t/click %s %s" % [ip, Time.now.to_i, uri.query, user_agent]
@@ -142,8 +158,13 @@ class ClickHandler
   def handle_call
     url = url_for(platform)
 
-    click_queue.push(click_to_kafka_string(:redirect_url => url))
+    url = if url.blank?
+            ENV['NOT_FOUND_URL'].blank? ? nil : ENV['NOT_FOUND_URL']
+          else
+            url
+          end
 
-    url.blank? ? ["",404] : [url, 307]
+    click_queue.push(click_to_kafka_string(:redirect_url => url))
+    url.blank? ? ["",404] : [url,307]
   end
 end
