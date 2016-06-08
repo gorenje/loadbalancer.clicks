@@ -9,13 +9,8 @@ class ClickHandler
               :idfa_comb, :created_at, :app_name, :user_agent
 
   def initialize(params, request)
-    @camlink = $cam_lnk_cache[params[:id].to_i]
-
-    # refresh the cache if we didn't find a campaign link
-    @camlink = if @camlink.nil?
-      $refresh_cam_lnk_cache.call
-      $cam_lnk_cache[params[:id].to_i]
-    end
+    @camlink = $cam_lnk_cache[params[:id].to_i] ||
+      ($refresh_cam_lnk_cache.call && $cam_lnk_cache[params[:id].to_i])
 
     @ip           = request.ip || '0.0.0.0'
     @adid         = params[:adid] ? ClickHandler.pimp_adid_if_broken(params[:adid]) : nil
