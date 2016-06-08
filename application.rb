@@ -1,6 +1,3 @@
-# include pry. to start the debugger, put the following anywhere in the code:
-#   binding.pry
-# and as soon you hit that point, a pry shell will be started
 require 'bundler/setup'
 require 'sinatra'
 require 'sinatra/json'
