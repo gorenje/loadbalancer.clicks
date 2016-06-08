@@ -53,6 +53,10 @@
       "value": "http://your.home.page",
       "required": false
     },
+    "API_SECRET_KEY": {
+      "description": "Secure the API with this key. Needs also to be set on the analytics side.",
+      "generator": "secret"
+    },
     "WEB_CONCURRENCY": {
       "description": "unicorn worker count",
       "value": "5" 
