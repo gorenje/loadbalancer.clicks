@@ -2,7 +2,7 @@ require_relative '../lib/helpers.rb'
 
 class ClickHandler
 
-  FractionOfDay = 1/3600.to_f
+  MinuteFractionOfDay = 1/1440.to_f
 
   attr_reader :adid, :adgroup, :ad, :campaign, :click, :ip, :network,
               :partner_data, :platform, :idfa_md5, :idfa_sha1,
@@ -106,7 +106,7 @@ class ClickHandler
                      @camlink.attribution_window_idfa
                    else
                      @camlink.attribution_window_fingerprint
-                   end * FractionOfDay)
+                   end * MinuteFractionOfDay)
   end
 
   def click_to_kafka_string(extras = {})
