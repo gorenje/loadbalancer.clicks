@@ -5,7 +5,7 @@ class RedirectTest < Minitest::Test
   include Rack::Test::Methods
 
   def app
-    Sinatra::Application
+    Rack::Builder.parse_file('config.ru').first
   end
 
   def setup

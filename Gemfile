@@ -35,7 +35,6 @@ gem 'device_detector', :github => 'wlf/device_detector'
 gem 'addressable'
 
 group :test do
-  gem 'hpricot'
   gem 'rack-test'
   gem 'rr', '1.0.4'
   gem 'shoulda'

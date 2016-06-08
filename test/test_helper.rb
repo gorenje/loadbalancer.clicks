@@ -9,7 +9,6 @@ require "bundler/setup"
 require 'rack/test'
 require 'shoulda'
 require 'rr'
-require 'hpricot'
 # use binding.pry at any point of the tests to enter the pry shell
 # and pock around the current object and state
 #    https://github.com/pry/pry/wiki/Runtime-invocation
