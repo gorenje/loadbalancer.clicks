@@ -87,5 +87,17 @@ class ApiTest < Minitest::Test
         assert_equal 1, CampaignLink.count
       end
     end
+
+    should "work but ignore the key if none is set" do
+      cl = generate_campaign_link(@base_data)
+      CampaignLink.delete_all
+
+      str = cl.to_json
+      p = Digest::SHA1.hexdigest("somesalt" + str + "fubar")
+      post("/api/1/create", { :campaign_link => str, :pepper => p },
+           { "X-API-SALT" => "somesalt"})
+      assert last_response.ok?
+      assert_equal 1, CampaignLink.count
+    end
   end
 end
