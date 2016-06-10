@@ -5,6 +5,8 @@ ENV['PORT']         = '9999'
 ENV['TZ']           = 'UTC'
 ENV['DATABASE_URL'] = ENV['DATABASE_URL'] + "_test"
 
+ENV['REDIS_URL_CLICKSTORE_1'] = "redis://localhost:6379/27"
+
 require "bundler/setup"
 require 'rack/test'
 require 'shoulda'
@@ -16,7 +18,6 @@ require 'pry'
 require 'fakeweb'
 require 'minitest/autorun'
 
-require_relative '../lib/ruby_extensions.rb'
 require_relative '../application.rb'
 
 raise "Not Using Test Environment" if settings.environment != 'test'
@@ -25,6 +26,18 @@ FakeWeb.register_uri(:post, /metrics-api.librato.com/, :status => 200)
 
 class Minitest::Test
   include RR::Adapters::TestUnit
+
+  def assert_last_response_was_gif(msg = nil)
+    assert last_response.ok?, msg
+    assert_equal "image/gif", last_response.content_type, msg
+    assert_pixel_data(last_response.body, msg)
+  end
+
+  def assert_pixel_data(d, msg = nil)
+    assert_equal([71,73,70,56,57,97,1,0,1,0,128,1,0,0,0,0,255,255,255,33,
+                  249,4,1,0,0,1,0,44,0,0,0,0,1,0,1,0,0,2,2,76,1,0,59].
+                 pack("C*"), d, msg)
+  end
 
   def silence_is_golden
     old_stderr,old_stdout,stdout,stderr =

@@ -6,10 +6,11 @@ post '/api/:version/create' do
     halt(404) if params[:pepper] != pepper
   end
 
-  cl = JSON.parse(params[:campaign_link])
+  cldata = JSON.parse(params[:campaign_link])
   CampaignLink.
-    find_or_create_by(:id => cl["id"]).
-    update(cl)
+    find_or_create_by(:id => cldata["id"]).
+    update(cldata)
+
   $refresh_cam_lnk_cache.call
   json({ :status => :ok })
 end

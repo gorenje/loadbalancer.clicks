@@ -2,24 +2,19 @@
 module EccrineTracking
   module Helpers
     def obtain_adid
-      adid = params[:adid] || params[:idfa] || params[:gadid]
-      ClickHandler.valid_adid?(adid) ? adid : nil
-    end
-
-    def appstore_from_params
-      (!params[:ascc].blank? && params[:ascc]) || nil
+      params[:adid] || params[:idfa] || params[:gadid]
     end
 
     def handle_tracking_call(redirect = true)
       click_handler = ClickHandler.new(params, request)
-      url, code = click_handler.handle_call
+      url, respcode = click_handler.handle_call
 
       if url.blank?
         halt(404)
       elsif !redirect
         [200, ['']]
-      elsif code
-        redirect url, code
+      elsif respcode
+        redirect url, respcode
       else
         File.read(File.join('public', 'index.html')) #just a file now
       end

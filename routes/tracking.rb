@@ -10,3 +10,7 @@ end
 get '/apple-*.png' do
   return_one_by_one_pixel
 end
+
+get '/robots.txt' do
+  "User-agent: *\nDisallow: /\n"
+end

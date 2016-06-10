@@ -4,52 +4,32 @@ class ClickHandler
 
   MinuteFractionOfDay = 1/1440.to_f
 
-  attr_reader :adid, :adgroup, :ad, :campaign, :click, :ip, :network,
-              :partner_data, :platform, :idfa_md5, :idfa_sha1,
-              :idfa_comb, :created_at, :app_name, :user_agent
+  attr_reader :adid, :click, :ip, :partner_data, :platform, :idfa_md5,
+              :idfa_sha1, :idfa_comb, :created_at, :app_name, :user_agent,
+              :camlink
 
   def initialize(params, request)
-    @camlink = $cam_lnk_cache[params[:id].to_i] ||
-      ($refresh_cam_lnk_cache.call && $cam_lnk_cache[params[:id].to_i])
-
+    @created_at   = DateTime.now
+    @camlink      = obtain_campaign_link(params[:id].to_i)
     @ip           = request.ip || '0.0.0.0'
-    @adid         = params[:adid] ? ClickHandler.pimp_adid_if_broken(params[:adid]) : nil
-    @adgroup      = @camlink.adgroup
-    @ad           = @camlink.ad
-    @campaign     = @camlink.campaign
-    @network      = @camlink.network
-    @click        = ClickHandler.get_click_param(network, params[:click]||"")
+    @adid         = ClickHandler.uuidify_adid(params[:adid])
+    @click        = params[:click]
     @partner_data = params[:partner_data] || params[:cb]
     @idfa_md5     = params[:idfa_md5]
     @idfa_sha1    = params[:idfa_sha1]
-    @created_at   = DateTime.now
     @idfa_comb    = compose_idfa_comb(@adid, @idfa_md5, @idfa_sha1, params)
     @user_agent   = request.user_agent
-
-    # original parameters but remove everything that we use or send already
-    @params = params.tap do |p|
-      ["id", "adid", :adid, "idfa", "gadid", "click", "captures", "idfa_md5",
-       "idfa_sha1", "partner_data"].each { |key| p.delete(key) }
-    end
+    @platform     = compute_platform
+    @reqparams    = compose_reqparams(params)
   end
 
-  def self.pimp_adid_if_broken(adid)
+  def self.uuidify_adid(adid)
+    return nil if adid.nil?
     if adid =~ /^([a-f0-9]{8})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{4})([a-f0-9]{12})$/i
       "#{$1}-#{$2}-#{$3}-#{$4}-#{$5}"
     else
       adid
     end.upcase
-  end
-
-  def self.get_click_param(network, param)
-    click = param[0..254]
-    $librato_queue.add(
-      "#{ENV['LIBRATO_PREFIX']}.invalid_click_param" => {
-        :source => network,
-        :value  => 1
-      }
-    ) if click != param
-    click
   end
 
   def self.report(message, params)
@@ -62,14 +42,6 @@ class ClickHandler
     )
   end
 
-  def self.valid_adid?(adid)
-    !valid_adid(adid).nil?
-  end
-
-  def self.valid_adid(adid)
-    (!adid.blank? && !(adid =~ /^[0-]+$/) && adid) || nil
-  end
-
   def self.valid_idfa_comb(idfa, idfa_md5, idfa_sha1)
     if idfa =~ /[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/i
       idfa.upcase
@@ -78,6 +50,27 @@ class ClickHandler
     elsif idfa_sha1 =~ /[a-f0-9]{40}/i
       idfa_sha1.downcase
     end
+  end
+
+  def click_queue
+    @click_queue ||= RedisQueue.new($redis_pool)
+  end
+
+  def compute_platform
+    DeviceDetector.new(@user_agent).os_name.to_s.downcase
+  end
+
+  def obtain_campaign_link(id)
+    $cam_lnk_cache[id] || $refresh_cam_lnk_cache.call[id]
+  end
+
+  def has_idfa_comb?
+    !@idfa_comb.nil?
+  end
+
+  def url_for(plform)
+    @camlink.target_url[plform] || @camlink.target_url["default"] ||
+      @camlink.target_url["fallback"]
   end
 
   def compose_idfa_comb(idfa, idfa_md5, idfa_sha1, params)
@@ -89,8 +82,12 @@ class ClickHandler
     result
   end
 
-  def has_idfa_comb?
-    !@idfa_comb.nil?
+  def compose_reqparams(params)
+    # original parameters but remove everything that we use or send already
+    {}.merge(params).tap do |p|
+      ["id", "adid", :adid, "idfa", "gadid", "click", "captures", "idfa_md5",
+       "idfa_sha1", "partner_data"].each { |key| p.delete(key) }
+    end
   end
 
   def lookup_key
@@ -111,16 +108,17 @@ class ClickHandler
 
   def click_to_kafka_string(extras = {})
     paramsuri = Addressable::URI.new
-    paramsuri.query_values = @params
+    paramsuri.query_values = @reqparams
 
     uri = Addressable::URI.new
     uri.query_values = {
-      :network    => network,
-      :adid       => adid,
-      :adgroup    => adgroup,
-      :ad         => ad,
-      :campaign   => campaign,
-      :created_at => created_at.to_s,
+      ## for reference
+      :adid             => adid,
+      :network          => @camlink.network,
+      :adgroup          => @camlink.adgroup,
+      :ad               => @camlink.ad,
+      :campaign         => @camlink.campaign,
+      :created_at       => created_at.to_s,
       ## for attribution of clicks to installs, the following:
       :click            => click,
       :partner_data     => partner_data,
@@ -135,19 +133,6 @@ class ClickHandler
     }.merge(extras)
 
     "%s %i clicks /t/click %s %s" % [ip, Time.now.to_i, uri.query, user_agent]
-  end
-
-  def click_queue
-    @click_queue ||= RedisQueue.new($redis_pool)
-  end
-
-  def url_for(plform)
-    @camlink.target_url[plform] || @camlink.target_url["default"] ||
-      @camlink.target_url["fallback"]
-  end
-
-  def platform
-    DeviceDetector.new(@user_agent).os_name.to_s.downcase
   end
 
   def handle_call
