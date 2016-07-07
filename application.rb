@@ -50,7 +50,7 @@ use ExceptionHandling
 # initial the view helpers
 require_relative 'lib/helpers.rb'
 helpers do
-  include EccrineTracking::Helpers
+  include AdtekioTracking::Helpers
 end
 
 require_relative 'lib/redis_pool.rb'

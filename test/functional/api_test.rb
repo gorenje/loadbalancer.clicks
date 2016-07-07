@@ -18,7 +18,55 @@ class ApiTest < Minitest::Test
     }
   end
 
-  context "basic" do
+  context "deletion" do
+    should "work" do
+      add_to_env("API_SECRET_KEY" => "fubar") do
+        CampaignLink.delete_all
+        cl = generate_campaign_link(@base_data)
+        assert_one CampaignLink.count
+
+        str = cl.to_json
+        p = Digest::SHA1.hexdigest("somesalt" + str + "fubar")
+        post("/api/1/delete", { :campaign_link => str, :pepper => p },
+             { "HTTP_X_API_SALT" => "somesalt"})
+        assert last_response.ok?
+        assert_zero CampaignLink.count
+      end
+    end
+
+    should "not work if salt does not match" do
+      add_to_env("API_SECRET_KEY" => "fubar") do
+        CampaignLink.delete_all
+        cl = generate_campaign_link(@base_data)
+        assert_one CampaignLink.count
+
+        str = cl.to_json
+        p = Digest::SHA1.hexdigest("somesalt" + str + "fubar")
+        post("/api/1/delete", { :campaign_link => str, :pepper => p },
+             { "HTTP_X_API_SALT" => "somesaltnotmatch"})
+
+        assert last_response.not_found?
+        assert_one CampaignLink.count
+      end
+    end
+
+    should "work even if the campaign link does not exist" do
+      add_to_env("API_SECRET_KEY" => "fubar") do
+        cl = generate_campaign_link(@base_data)
+        CampaignLink.delete_all
+
+        str = cl.to_json
+        p = Digest::SHA1.hexdigest("somesalt" + str + "fubar")
+        post("/api/1/delete", { :campaign_link => str, :pepper => p },
+             { "HTTP_X_API_SALT" => "somesalt"})
+
+        assert last_response.ok?
+        assert_zero CampaignLink.count
+      end
+    end
+  end
+
+  context "creation" do
     should "create new campaign link" do
       replace_in_env("API_SECRET_KEY" => nil) do
         cl = generate_campaign_link(@base_data)
@@ -48,7 +96,7 @@ class ApiTest < Minitest::Test
         cl = CampaignLink.find(cl.id)
         assert "fubar", cl.adgroup
 
-        assert_equal 1, CampaignLink.count
+        assert_one CampaignLink.count
       end
     end
   end
@@ -62,7 +110,7 @@ class ApiTest < Minitest::Test
         post("/api/1/create", { :campaign_link => cl.to_json },
              { "HTTP_X_API_SALT" => "nomatch"})
         assert last_response.not_found?
-        assert_equal 0, CampaignLink.count
+        assert_zero CampaignLink.count
       end
     end
 
@@ -74,7 +122,7 @@ class ApiTest < Minitest::Test
         post("/api/1/create", { :campaign_link => cl.to_json, :pepper => "p" },
              { "HTTP_X_API_SALT" => "nomatch"})
         assert last_response.not_found?
-        assert_equal 0, CampaignLink.count
+        assert_zero CampaignLink.count
       end
     end
 
@@ -88,7 +136,7 @@ class ApiTest < Minitest::Test
         post("/api/1/create", { :campaign_link => str, :pepper => p },
              { "HTTP_X_API_SALT" => "somesalt"})
         assert last_response.ok?
-        assert_equal 1, CampaignLink.count
+        assert_one CampaignLink.count
       end
     end
 
@@ -102,7 +150,7 @@ class ApiTest < Minitest::Test
         post("/api/1/create", { :campaign_link => str, :pepper => p },
              { "HTTP_X_API_SALT" => "somesalt"})
         assert last_response.ok?
-        assert_equal 1, CampaignLink.count
+        assert_one CampaignLink.count
       end
     end
   end

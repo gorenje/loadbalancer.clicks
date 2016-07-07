@@ -27,6 +27,14 @@ FakeWeb.register_uri(:post, /metrics-api.librato.com/, :status => 200)
 class Minitest::Test
   include RR::Adapters::TestUnit
 
+  def assert_zero(val, msg = nil)
+    assert_equal 0, val, msg
+  end
+
+  def assert_one(val, msg = nil)
+    assert_equal 1, val, msg
+  end
+
   def assert_last_response_was_gif(msg = nil)
     assert last_response.ok?, msg
     assert_equal "image/gif", last_response.content_type, msg

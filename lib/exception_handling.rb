@@ -9,8 +9,8 @@ class ExceptionHandling
     rescue => ex
       begin
 
-        $librato_queue.add('mops.eccrine.rb' => {
-          :source => "eccrine.exception", :value => 1
+        $librato_queue.add('adtekio.trk.clks' => {
+          :source => "exception", :value => 1
         })
       rescue
 
