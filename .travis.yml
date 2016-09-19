@@ -3,6 +3,10 @@ dist: trusty
 language: ruby
 rvm:
   - 2.2.3
+env:
+  global:
+    - RACK_ENV=test
+    - DATABASE_URL=postgres://postgres:@localhost:5432/travis_ci
 services:
   - redis-server
   - postgresql
