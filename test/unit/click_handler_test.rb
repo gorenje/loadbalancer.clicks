@@ -6,6 +6,7 @@ class ClickHandlerTest < Minitest::Test
   context "campaign link cache" do
     should "update if no campaign link available" do
       CampaignLink.delete_all
+      $refresh_cam_lnk_cache.call
       assert_raises(NoMethodError) do
         ClickHandler.new({:id => 1}, OpenStruct.new).click_to_kafka_string
       end
