@@ -3,7 +3,10 @@ ENV['RACK_ENV']     = 'test'
 ENV['IP']           = 'www.example.com'
 ENV['PORT']         = '9999'
 ENV['TZ']           = 'UTC'
-ENV['DATABASE_URL'] = ENV['DATABASE_URL'] + "_test"
+
+unless ENV['DATABASE_URL'] =~ /_test$/
+  ENV['DATABASE_URL'] = ENV['DATABASE_URL'] + "_test"
+end
 
 ENV['REDIS_URL_CLICKSTORE_1'] = "redis://localhost:6379/12"
 
