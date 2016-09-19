@@ -7,3 +7,5 @@ services:
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
   - bundle exec rake db:migrate
+addons:
+  postgresql: "9.5"

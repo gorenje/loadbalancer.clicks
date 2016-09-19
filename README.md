@@ -63,6 +63,10 @@ Easiest way to deploy this, is to use heroku!
 
 [![Deploy To Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy?template=https://github.com/adtekio/tracking.clicks)
 
+## Travis
+
+[![Build Status](https://travis-ci.org/adtekio/tracking.clicks.svg?branch=master)](https://travis-ci.org/adtekio/tracking.clicks)
+
 ## Testing locally
 
 Generate a ```.env``` and then fill it with values:
